@@ -1,9 +1,18 @@
-```{r setup, echo = FALSE}
+---
+title: "Big Data: Group Summative Project"
+output: word_document
+date: "`format(Sys.time(), '%d %B %Y')"
+---
+
+
+```{r setup, include= FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 setwd("C:/Users/james/OneDrive - The University of Nottingham/Documents/Notts/Big data/Real project")
 r = getOption("repos")
 r["CRAN"] = "http://cran.us.r-project.org"
 options(repos = r)
-
+```
+```{r data cleaning, echo=FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(lubridate)
 library(dplyr)
@@ -131,10 +140,6 @@ BRLEUR <- BRLEUR %>% dplyr::select(ref_date, price_close) %>%
   rename(date = ref_date, BRLEUR = price_close)
 
 ## Interest rates
-
-# Not using: UKGILT <- yf_get(tickers =  "IGLT.L", 
-                 #first_date = first_date, 
-                 #last_date = last_date)
 
 UKBOND <- read_csv("UK_1yr_bond.csv") %>% dplyr::select(Date, Price) %>%
   rename(date = Date, uk_bond = Price)
@@ -624,6 +629,39 @@ for (i in colnames(BVSP_s_combined)){
   }
 }
 ```
+
+# Introduction
+
+In a widely cited article (Lo and MacKinlay, 1988) it was suggested that stock prices do not follow random walks, indicating that to some extent, stock markets are predictable. Many studies have subsequently attempted to predict stock index movements, with a large proportion of the research focussing on predicting the level of stock market return. However, predicting the direction of stock movement is also an important feature of an effective market trading strategy and may even be more profitable than trading based on level-based predictions with a certain forecast error (Leung et al., 2000).  
+
+  
+
+This aim of this paper is to provide a comparison of the performance of different predictive models using ensemble methods in a four-class classification task of the direction of intraday returns of stock market indices. A comparison will be made between predicting movements in indices from a developed and emerging economy by examining the performance in predicting the UK FTSE All-Share Index and the Brazilian Ibovespa (Bovespa) Index. The remainder of this paper is structured as follows. Section I reviews relevant literature around this topic. Section II gives a brief overview of the data used in this study. Section III presents the empirical approach and main results of the study and Section IV provides some extensions using alternative specifications. Finally, this paper summaries the results.  
+
+  
+
+ 
+
+# Section I: Literature review 
+
+ 
+
+There are now many examples in the literature using different classification techniques to predict the direction of stock index movements. Much of the research considers a two-category classification problem, examining the performance of models in predicting upward or downward movements. One example is Shynkevich et al. (2017) who classify the movements in the closing price of the US S&P 500 stock market index into ‘Up’ or ‘Down’. Using a variety of classifiers, they find that Support Vector Machines (SVM) obtain the highest prediction accuracy of 75.4%. Lohrmann and Lukka (2019) demonstrate the value of using more event outcomes for classification in improving trading strategies. Using random forest classifiers to predict the intraday returns of the US S&P500 index, they consider a four-class classification problem: ‘strong positive’, ‘slightly positive’, ‘slightly negative’ and ‘strong negative’. They find that the accuracy of predictions for the four classes differed considerably. The models performed better in the classification of positive returns, with accuracy ranging between 40.7% (‘strong positive’) and 55.8% (‘slightly positive’), compared with negative returns, of which 23.8% (‘slightly negative’) to 41.2% (‘strong negative’) were correctly classified.   
+
+  
+
+As summarised in a review of more than 100 related articles, the sample size varies across studies, but many studies opt for a large amount of data to capture long run trends in the stock index (Atsalakis and Valavanis, 2009). A variety of features are used to support classification. These often include technical indicators, which are computed from historical financial data and are useful to identify future stock movements based on past behaviour, as well as external indicators, which allow researchers to capture market reactions to wider political and economic factors (Vargas et al, 2018). An estimated 20% of financial market forecasting approaches use technical indicators as input features (Atsalakis and Valavanis, 2009). These commonly include things like moving averages (MA), Bollinger Bands, and momentum indicators such as the relative strength index (RSI). O’Connor and Madden (2005) evaluate the effectiveness of using external indicators in addition to technical indicators as inputs in predicting movements in the Dow Jones Industrial Average Index, a price-weighted average of 30 major companies traded in the U.S. The addition of external indicators such as crude oil and exchange rate data was found to improve the predictive power and directional success of the models.   
+
+  
+
+In relation to UK stock indices, Leung et al. (2000) used a two-class classification problem (up or down) and various techniques such as binary choice models and artificial neural networks (ANN) to predict the movement of the UK FTSE 100 stock index returns. The highest accuracy achieved was 61%. Similar results were achieved in Brazil, though accuracy tends to be marginally lower. De Faria et al (2009) used ANN and adaptive exponential smoothing to estimate the direction of the Brazilian Ibovespa stock returns and found that the best models achieved an accuracy of around 60%. Fonseca et al (2021) predicted the directional movement of the stock return of 10 large companies in Brazil using SVM, which achieved an average accuracy of around 53%. There is limited evidence around the four-class classification of stock returns in these countries, which provides good motivation for this study.  
+
+# Section II: Data summary 
+
+The FTSE All-share index (FTAS) is a weighted index consisting of 600 of the largest companies listed on the London stock exchange. It serves as an excellent benchmark for UK stock price performance and the UK economy, capturing 98% of the UK’s market capitalization (LSEG, 2023.) Similarly, the Bovespa Index (BVSP) provides a representative performance measure of companies trading on the Brazilian ‘B3’ stock exchange. However, unlike the FTAS, the Bovespa Index exhibits significantly higher volatility, with a standard deviation of returns averaging 67.8% annually since 1968, compared to a mean return of 21.5% (Araújo, Brito and Sanvicente, 2020). This is likely due to both its smaller market capitalisation and macroeconomic instability. We believe this contrasts well with the FTAS and will provide different market dynamics on which to train our predictive models. 
+  
+Our datasets cover a period from the 1st of January 2023 to the 20th of March 2024, resulting in 301 and 306 observations of intraday returns for BVSP and FTAS, respectively. Price and volume data for all trading days were downloaded from Yahoo Finance. Initial time series price plots for the UK FTSE All-Share Index and the Brazilian Bovespa Index can be seen in Figure 1 and Figure 2 respectively.  
+
 ```{r FTSE Graphs, echo=FALSE}
 BVSP_graph = ggplot(BVSP_s, aes(x = date, y = open)) +
     geom_line(color = "blue") +
@@ -641,6 +679,48 @@ ftas_graph = FTAS_graph = ggplot(FTAS_s, aes(x = date, y = close)) +
 
 ggsave("ftas_graph.png", plot = ftas_graph, height = 6, width = 8, units = "in", dpi = 300)
 ```
+
+Over our sample period, FTAS and BVSP saw a 2.25% and 19.89% price increase, respectively. Despite this, the price moved up on only ~50% of days. 
+
+
+
+When considering training the models using a larger time period, we were cautious about potential structural breaks caused by the COVID-19 pandemic. With data from 2023 onwards, we avoid overfitting to a trend that no longer exists. 
+
+Aggarwal et al. (1999) studied 16 emerging and developed markets and found that the Ibovespa had the greatest volatility whilst the UK index had the lowest. In our data, returns for the Brazilian index range from -2.40% to +4.29% compared to -3.62% to +2.84% for FTAS. 
+  
+To predict intraday returns, we construct a feature set of technical trading indicators. We employ 42 indicators commonly used by other researchers (Atsalakis and Valavanis, 2009). These features transform price and volume data to provide information on trends, volatility and momentum - their lagged values may have some predictive power. Descriptions and formulas were taken from the R package, ‘TTR’.  A selected list is provided in Table 5.
+
+In addition, following O’Connor and Madden (2005), we compile a dataset of relevant external indictors, which are presented in Table 6.
+
+We normalize all numeric data to ensure that the models are scale invariant. Finally, we omit observations that contain missing values. These missing values occur due to some technical trading indicators requiring an initial number of days before producing a value.
+
+# Section III: Empirical strategy and results 
+
+## Empirical strategy
+
+In order to predict intraday returns, we separate observations into four classes: ‘Large up’, ‘Small up’, ‘Large down’ and ‘Small down’ as in Lohrmann and Lukka (2019). 
+  
+We chose this criterion to have a sufficient sample size for each class. Since data is reported daily, we lead the intraday return variable so that the models can use only the previous days information to make a prediction. 
+  
+For each index, we train models using the following methods: 
+  
+Elastic Net – This regularization method penalizes higher magnitude coefficients. We tune the model using 8 different alphas and lambdas. The alpha hyperparameter determines the relative weights of the ridge and lasso penalties, whereas the lambda determines the penalty's strength. 
+  
+Decision Tree – This method works by repeatedly splitting the data into different subsets depending on a certain feature, until a specified stopping point. New data can then traverse the tree and be assigned a class. We tune the model by trying 8 different values of the complexity parameter, which represents a trade-off between incorporating information and computational cost. 
+  
+Random Forest – In a random forest, many trees are created – each using a different subset of features. New observations are tested on all trees and modal prediction is taken. For each tree we vary the number of features that can be used to construct it to introduce variation.  
+  
+Bootstrap Aggregating (Bagging) – Bagging is an ensemble method that creates many unpruned trees on different subsets of the data. The trees are then aggregated, reducing variance and making them robust to overfitting. This method can produce reliable predictions but is usually computationally expensive. 
+  
+Support Vector Machines (SVM) – SVM works to find the optimal decision boundary that separates the classes in a feature-dimensional space. 
+  
+For each model, we assess its performance using accuracy. We hypothesize that false positives and false negatives would be equally costly to a trader using our models, making accuracy suitable. 
+
+Our primary results, shown in the subsequent section, use the dataset of technical trading indicators to forecast 1-step ahead. In the alternative specifications section, we combine both the technical and external indicators and assess the change in performance. Furthermore, we assess the feasibility of 5-step ahead forecasts. We also employ an alternative metric, Kappa in addition to accuracy. The kappa metric accounts for the fact that random guessing would produce correct predictions by chance. 
+
+As an initial illustration, Figure 3 presents the variable importance plot (VIP) for the FTAS decision tree model with no external indicators. The Chaikin Money Flow (CMF) technical indicator, which measures the amount of money flowing into an asset over a period, is the most important variable for FTAS index prediction. The five most important variables are all technical indicators, as opposed to lagged values of the dependent variable, and this illustrates that these indicators contain some meaningful information.
+
+
 ```{r FTSE TTR setup, echo=FALSE}
 ##### Short term analysis from 2023 -------------------------------------------------------------------------------------
 
@@ -2529,3 +2609,35 @@ dotplot(resamps, metric = "Accuracy")
 dotplot(resamps, metric = "Kappa")  
 
 ```
+
+```{r VIP chart, echo=FALSE}
+rpart.mod
+vip(rpart.mod, num_features = 5)
+```
+## Results
+ 
+We initially forecast one step ahead with rolling and recursive methods, for both UK and Brazilian markets. Recursive forecasts expand the in-sample window at each period, incorporating the newest information. Rolling forecasts keep the amount of data being used to forecast fixed, dropping the oldest observation in favour of the most recent. We begin with an initial window size of 146 observations and evaluate the one-step ahead forecasts with their accuracy metric.
+ 
+Accuracy metrics are reported in Table 8 and box plots in Figures 4-7. The best models were rf – random forests – and glmnet – elastic net. These methods feature as the top 2 methods in all 4 uses. 
+
+All models (aside from SVM FTAS recursive) perform better than random chance with a balanced classification data set, which in the four-class case is 25%. The highest accuracy achieved was 47% with the elastic net model and the models consistently performed better for the FTAS than for the BVSP. The best models for Brazil were elastic net and random forests which had a maximum average accuracy of 36%. The difference between the accuracies in the two markets aligns with what is seen in the literature, although it is more pronounced here. This difference could be because emerging markets are more exposed to economic shocks which makes the stock market harder to predict (Aggarwal et al., 1999). 
+
+Our accuracy results for the FTAS are comparable with the average results of Lohrmann and Lukka (2019). Their four-class classification analysis of the S&P500 yielded average accuracy of 41.0-46.3% using random forests. Our results sit in the middle of their range at 44-45%. 
+
+SVM consistently performs worst of any of the models we test, though it is notable that it performs relatively less poorly for the BVSP. However, this does differ from the apparent strength of SVM in Shynkeyich et al. (2017) who find SVM to be much stronger than alternative models. This is however, for a two-class problem, and for when the forecast horizon is equal to the input length, both features which are not aligned with our methodology, and could explain the differences observed.  Figures 4-7 show that the confidence intervals for models in most instances overlap, indicating that differences in terms of accuracy are not significant at the 95% confidence level.
+
+# Section IV: Extended Analysis 
+
+In an attempt to improve our predictions, we try both extending the forecast horizon and adding relevant external indicators. Again, both rolling and recursive forecasting are considered. We also consider an alternative metric – Kappa – to compare model performance. To exemplify why accuracy can be misleading, consider a data set where the majority of points fall into one category (e.g. small-down), a model that selects that category for all of its forecasts would attain a reasonable accuracy by chance without actually exploiting any of the patterns in the data. Kappa considers the correct predictions that will be achieved by chance and is therefore, more equipped to deal with these kinds of unbalanced data sets.  
+
+When considering the accuracy metric, the extension of the forecast horizon to five steps ahead did not improve the model performance for either stock market index. The highest accuracy achieved for the FTAS Index at five-steps-ahead was 45%. This was achieved by both the bagging and the random forest models when performing recursive forecasting. In comparison, the one-step ahead elastic net recursive forecast achieved 47% accuracy. The highest accuracy for the BVSP Index at five-steps-ahead was the random forests recursive forecast at 35%. However, this model achieved 36% accuracy at one-step-ahead. Overall, at this longer horizon the recursive forecasting technique is favoured but the extension to five-steps ahead has offered no meaningful improvement to the predictive accuracy. 
+
+For these recursive forecasting techniques, we now compare the models using the Kappa metric. The bagging model has the highest Kappa for five-step ahead predictions of the FTAS Index. However, Figure 8 shows that there is no significant difference between the Kappa metrics of the bagging, elastic net, decision tree or random forest models. The model performance comparison using the Kappa metric is in line with the results from the accuracy metric at the one-step ahead horizon, whereby the accuracy metric could not significantly distinguish between the top performing models and showed a relatively poorer performance of the SVM model. Figure 9 shows that for the BVSP Index, the bagging model has the highest Kappa. Again, there is not a significant difference between the Kappa metric of the best performing models and there is a relatively poor performance of SVM model. These results are also in line with the conclusions made using the BVSP index accuracy metrics for the one-step-ahead horizon. The inclusion of the Kappa metric has favoured the bagging models however, it has offered no further insight into a statistically significant top performing model. Overall, the alignment of the Kappa to the accuracy results assures us that our selection of optimal models was not the product of random chance predictions. 
+
+We now consider the addition of external indicators to improve upon the one-step ahead recursive forecasting. From the VIP plot earlier, technical indicators provided valuable information. If, like these technical indicators, the external indicators include relevant information, they could improve the forecasting performance. However, their addition could hinder performance if they just introduce more noise into the data. Table 9 shows that for the FTAS index, the maximum accuracy achieved was by the elastic net model at 33%. This is considerably lower than the 47% accuracy achieved from the same model without the external variables. Table 10 shows that for the BVSP Index, 44% accuracy was achieved by the random forests model when external indicators are included. This is far greater than the 36% accuracy achieved by the same model without external indicators. This is despite having to use a shorter training period due to data availability. Therefore, these external indicators included some meaningful information that helped predict movements in the BVSP stock market index, whereas they were less helpful for the FTAS Index.
+
+# Conclusion 
+
+The aim of this paper was to provide a comparison of different models’ predictive abilities for a four-class classification task of the direction of intraday returns of stock market indices. The literature surveyed achieved predictive accuracies ranging from 20-60%. Thus, our highest accuracy of 47% for the FTSE index and 44% for the BVSP index is in line with the current predictive abilities within the literature. The relatively poorer forecasting performance of the emerging economy’s stock market index could be attributed to its volatile nature. Overall, for the Brazilian Index, the one-step ahead recursive random forest model with external indicators provided the best forecast accuracy. For the UK Index, the one-step ahead recursive elastic net model without external indictors provided the best forecast accuracy. Increasing the forecast horizon to 5-steps ahead did not improve the forecast accuracy and evaluation of the performance using the Kappa metric did not result in a statistically significant change in the optimal model. 
+
+One possible limitation of our analysis is the relatively short time period considered, which was influenced by computational capability. Further research could explore whether predictive performance is improved with more observations. Additionally, an implicit assumption made in the analysis is that traders’ preferences towards positive and negative returns are balanced however, preferences between losses and gains may vary depending on individual trading strategies and attitudes to risk. Different performance metrics may therefore be more suitable depending on these individual characteristics. 
